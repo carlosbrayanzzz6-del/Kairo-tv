@@ -6,7 +6,13 @@
     "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "extra": {
+      "eas": {
+        "projectId": "505c99af-c9f7-40fb-8d86-9988b0613fb5"
+      }
+    },
     "android": {
       "package": "com.kairo.tv"
     }
   }
+}
