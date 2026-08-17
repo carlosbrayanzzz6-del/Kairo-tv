@@ -394,3 +394,4 @@ const styles = StyleSheet.create({
   activeEpCard: { backgroundColor: '#00d2ff' },
   epText: { color: '#fff', fontSize: 12, fontWeight: 'bold' }
 });
+}
