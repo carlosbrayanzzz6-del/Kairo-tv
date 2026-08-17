@@ -4,7 +4,6 @@
     "slug": "kairo-tv",
     "version": "1.0.0",
     "orientation": "landscape",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "extra": {
       "eas": {
