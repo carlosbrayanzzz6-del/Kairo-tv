@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Kairo TV",
+    "slug": "kairo-tv",
+    "version": "1.0.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.kairo.tv"
+    }
+  }
+}
