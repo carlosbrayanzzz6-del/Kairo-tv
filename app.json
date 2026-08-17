@@ -4,14 +4,21 @@
     "slug": "kairo-tv",
     "version": "1.0.0",
     "orientation": "landscape",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "extra": {
-      "eas": {
-        "projectId": "5990db8d-b3d8-4c87-8a5d-7d34ea48b181"
-      }
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#050811"
+    },
+    "ios": {
+      "supportsTablet": true
     },
     "android": {
-      "package": "com.kairo.tv"
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#050811"
+      }
     }
   }
 }
