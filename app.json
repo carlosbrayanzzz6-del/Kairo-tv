@@ -1,30 +1,27 @@
 {
   "expo": {
-    "name": "Kairo TV",
-    "slug": "kairo-tv",
+    "name": "KAIRO",
+    "slug": "kairo-anime",
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#050811"
-    },
-    "ios": {
-      "supportsTablet": true
+      "backgroundColor": "#020617"
     },
     "android": {
-      "package": "com.carlosbrayanzzz.kairotv",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#050811"
-      }
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#020617"
+      },
+      "package": "com.kairo.anime.tv",
+      "supportsTablet": true,
+      "isTV": true
     },
-    "extra": {
-      "eas": {
-        "projectId": "5990db8d-b3d8-4c87-8a5d-7d34ea48b181"
-      }
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }
