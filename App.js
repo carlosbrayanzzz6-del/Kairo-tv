@@ -92,6 +92,9 @@ const ANIME_DATA = [
   }
 ];
 
+// Anime Destacado Inicial fijado de forma segura
+const FEATURED_ANIME = ANIME_DATA[0].animes[0];
+
 export default function App() {
   const [selectedAnime, setSelectedAnime] = useState(null);
   const [activeEpisodeUrl, setActiveEpisodeUrl] = useState(null);
@@ -144,9 +147,6 @@ export default function App() {
   const filteredAnimes = allAnimes.filter(anime => 
     anime.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Extrae el primer objeto de anime para usarlo en el banner de destacados
-  const FEATURED_ANIME = ANIME_DATA[0].animes[0];
 
   return (
     <View style={styles.container}>
@@ -243,3 +243,4 @@ export default function App() {
                     <TouchableOpacity style={styles.animeCard} onPress={() => openDetails(item)}>
                       <Image source={{ uri: item.image }} style={styles.animeImage} />
                       <View style={styles.badgeContainer}>
+                        <Text style={styles.ratingBadge}>{item.rating}</Text>
