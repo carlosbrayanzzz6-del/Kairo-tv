@@ -1,327 +1,245 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Dimensions,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  ScrollView, 
+  Image, 
+  TouchableOpacity, 
+  FlatList, 
+  Modal, 
+  TextInput,
+  Dimensions 
 } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { Video } from 'expo-av';
 
-const { height } = Dimensions.get('window');
-
-// Catálogo ampliado estilo plataforma premium pero 100% gratis y sin anuncios
-const KAIRO_PREMIUM_CATALOG = [
+// Base de datos de anime optimizada en Castellano Latino
+const ANIME_DATA = [
   {
-    id: '1',
-    title: 'Solo Leveling (Estreno)',
-    genre: 'Acción / Fantasía • Lat/Sub',
-    rating: '9.6',
-    synopsis: 'En un mundo donde cazadores con poderes combaten monstruos mortales, un débil cazador obtiene una oportunidad única.',
-    image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=60',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    category: "Estrenos al Instante (Latino)",
+    animes: [
+      {
+        id: "1",
+        title: "Solo Leveling (Estreno)",
+        rating: "9.6",
+        image: "https://justwatch.com",
+        banner: "https://justwatch.com",
+        synopsis: "En un mundo donde cazadores con poderes combaten monstruos mortales, un débil cazador obtiene una oportunidad única en un sistema secreto.",
+        seasons: [
+          {
+            name: "Temporada 1",
+            episodes: [
+              { id: "e1", title: "Episodio 1: El despertar", url: "https://googleapis.com" },
+              { id: "e2", title: "Episodio 2: Un intento más", url: "https://googleapis.com" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "2",
+        title: "Kimetsu no Yaiba",
+        rating: "9.5",
+        image: "https://justwatch.com",
+        banner: "https://justwatch.com",
+        synopsis: "Tanjiro emprende un viaje peligroso para salvar a su hermana Nezuko convertida en demonio y vengar la muerte de toda su familia.",
+        seasons: [
+          {
+            name: "Temporada 1",
+            episodes: [
+              { id: "e3", title: "Episodio 1: Crueldad", url: "https://googleapis.com" }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
-    id: '2',
-    title: 'Kimetsu no Yaiba',
-    genre: 'Shonen / Sobrenatural • Lat/Sub',
-    rating: '9.5',
-    synopsis: 'Tanjiro emprende un viaje para convertir cazadores de demonios y curar a su hermana convertida.',
-    image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500&auto=format&fit=crop&q=60',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-  },
-  {
-    id: '3',
-    title: 'Jujutsu Kaisen',
-    genre: 'Acción / Oscuro • Lat/Sub',
-    rating: '9.4',
-    synopsis: 'Estudiantes de hechicería luchan contra maldiciones ancestrales en el Japón moderno.',
-    image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-  },
-  {
-    id: '4',
-    title: 'Chainsaw Man',
-    genre: 'Acción / Gore • Lat/Sub',
-    rating: '9.0',
-    synopsis: 'Denji fusiona su vida con un demonio motosierra para sobrevivir en un mundo despiadado.',
-    image: 'https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=500&auto=format&fit=crop&q=60',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-  },
+    category: "Acción y Shonen Popular",
+    animes: [
+      {
+        id: "3",
+        title: "Jujutsu Kaisen",
+        rating: "9.4",
+        image: "https://justwatch.com",
+        banner: "https://justwatch.com",
+        synopsis: "Un estudiante de secundaria con fuerza sobrehumana se traga un dedo maldito y se une a una academia secreta de hechicería.",
+        seasons: [
+          {
+            name: "Temporada 1",
+            episodes: [
+              { id: "e4", title: "Episodio 1: Sukuna", url: "https://googleapis.com" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "4",
+        title: "Chainsaw Man",
+        rating: "9.0",
+        image: "https://justwatch.com",
+        banner: "https://justwatch.com",
+        synopsis: "Denji es un joven atrapado en la miseria extrema que resucita gracias a su perro demonio Pochita como el temible Hombre Motosierra.",
+        seasons: [
+          {
+            name: "Temporada 1",
+            episodes: [
+              { id: "e5", title: "Episodio 1: Perro y Motosierra", url: "https://googleapis.com" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 ];
 
 export default function App() {
-  const [selectedAnime, setSelectedAnime] = useState(KAIRO_PREMIUM_CATALOG[0]);
+  const [selectedAnime, setSelectedAnime] = useState(null);
+  const [activeEpisodeUrl, setActiveEpisodeUrl] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [myList, setMyList] = useState([]);
+  const [continueWatching, setContinueWatching] = useState([]);
+  const [selectedLanguage, setSelectedLanguage] = useState('Latino');
+
+  const openDetails = (anime) => {
+    setSelectedAnime(anime);
+  };
+
+  const closeDetails = () => {
+    setSelectedAnime(null);
+    setActiveEpisodeUrl(null);
+  };
+
+  const toggleMyList = (anime) => {
+    if (myList.some(item => item.id === anime.id)) {
+      setMyList(myList.filter(item => item.id !== anime.id));
+    } else {
+      setMyList([...myList, anime]);
+    }
+  };
+
+  const selectEpisode = (ep, anime) => {
+    setActiveEpisodeUrl(ep.url);
+    const filtered = continueWatching.filter(item => item.id !== anime.id);
+    setContinueWatching([{ ...anime, lastEpisodeTitle: ep.title }, ...filtered]);
+  };
+
+  const handleNextEpisode = () => {
+    if (!selectedAnime) return;
+    const allEpisodes = selectedAnime.seasons.flatMap(s => s.episodes);
+    const currentIndex = allEpisodes.findIndex(ep => ep.url === activeEpisodeUrl);
+    if (currentIndex !== -1 && currentIndex < allEpisodes.length - 1) {
+      const nextEp = allEpisodes[currentIndex + 1];
+      selectEpisode(nextEp, selectedAnime);
+    }
+  };
+
+  const hasNextEpisode = () => {
+    if (!selectedAnime || !activeEpisodeUrl) return false;
+    const allEpisodes = selectedAnime.seasons.flatMap(s => s.episodes);
+    const currentIndex = allEpisodes.findIndex(ep => ep.url === activeEpisodeUrl);
+    return currentIndex !== -1 && currentIndex < allEpisodes.length - 1;
+  };
+
+  const allAnimes = ANIME_DATA.flatMap(section => section.animes);
+  const filteredAnimes = allAnimes.filter(anime => 
+    anime.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Extrae el primer objeto de anime para usarlo en el banner de destacados
+  const FEATURED_ANIME = ANIME_DATA[0].animes[0];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0b0b0b" />
+    <View style={styles.container}>
+      {/* Encabezado Principal */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>KAIRO <Text style={styles.logoSub}>ULTRA</Text></Text>
+        <Text style={styles.tag}>FAMILIA • EN CASA</Text>
+      </View>
 
-      <ScrollView style={styles.mainScroll} showsVerticalScrollIndicator={false}>
-        {/* ENCABEZADO DE LA APP: MARCA LIBRE Y SIN ANUNCIOS */}
-        <View style={styles.appHeader}>
-          <Text style={styles.appName}>KAIRO <Text style={styles.appSubName}>TV</Text></Text>
-          <View style={styles.freeBadge}>
-            <Text style={styles.freeBadgeText}>GRATIS • SIN ANUNCIOS</Text>
-          </View>
-        </View>
-
-        {/* SECCIÓN PRINCIPAL: REPRODUCTOR INTEGRADO Y DETALLES */}
-        {selectedAnime && (
-          <View style={styles.heroSection}>
-            <View style={styles.heroInfo}>
-              <Text style={styles.title} numberOfLines={1}>
-                {selectedAnime.title} <Text style={styles.rating}>{selectedAnime.rating}</Text>
-              </Text>
-              
-              <View style={styles.genreBadge}>
-                <Text style={styles.genreText}>{selectedAnime.genre}</Text>
-              </View>
-
-              <Text style={styles.synopsisLabel}>Sinopsis:</Text>
-              <Text style={styles.synopsisText} numberOfLines={3}>
-                {selectedAnime.synopsis}
-              </Text>
-
-              <View style={styles.tvButtonsRow}>
-                <TouchableOpacity style={styles.tvButtonPrimary}>
-                  <Text style={styles.tvButtonTextPrimary}>▶ Reproducir</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tvButton}>
-                  <Text style={styles.tvButtonText}>Audio Latino</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.heroPlayerContainer}>
-              <WebView
-                source={{ uri: selectedAnime.videoUrl }}
-                style={styles.webViewPlayer}
-                allowsFullscreenVideo={true}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-              />
-            </View>
-          </View>
+      {/* Buscador Inteligente */}
+      <View style={styles.searchSection}>
+        <TextInput 
+          style={styles.searchInput}
+          placeholder="Buscar anime en latino..."
+          placeholderTextColor="#666"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Text style={styles.clearSearch}>Limpiar</Text>
+          </TouchableOpacity>
         )}
+      </View>
 
-        {/* SECCIÓN DE ESTRENOS Y CATÁLOGO */}
-        <View style={styles.recommendationsContainer}>
-          <Text style={styles.sectionTitle}>Estrenos al Instante (Latino)</Text>
-          <FlatList
-            data={KAIRO_PREMIUM_CATALOG}
-            horizontal
-            keyExtractor={(item) => item.id}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                style={[
-                  styles.card, 
-                  selectedAnime?.id === item.id && styles.cardSelected
-                ]}
-                onPress={() => setSelectedAnime(item)}
-              >
-                <Image source={{ uri: item.image }} style={styles.cardImage} />
-                <View style={styles.cardFooter}>
-                  <View style={styles.scoreBadge}>
-                    <Text style={styles.scoreText}>{item.rating}</Text>
-                  </View>
-                  <View style={styles.ccBadge}>
-                    <Text style={styles.ccText}>LAT</Text>
-                  </View>
-                </View>
-                <Text style={styles.cardTitle} numberOfLines={1}>
-                  {item.title}
-                </Text>
-              </TouchableOpacity>
+      <ScrollView style={styles.catalog} showsVerticalScrollIndicator={false}>
+        {searchQuery.length === 0 ? (
+          <>
+            {/* Banner Destacado Superior */}
+            <View style={styles.bannerContainer}>
+              <Image source={{ uri: FEATURED_ANIME.banner }} style={styles.bannerImage} />
+              <View style={styles.bannerOverlay}>
+                <Text style={styles.bannerBadge}>🔥 LO MÁS VISTO HOY</Text>
+                <Text style={styles.bannerTitle}>{FEATURED_ANIME.title}</Text>
+                <Text numberOfLines={2} style={styles.bannerSynopsis}>{FEATURED_ANIME.synopsis}</Text>
+                <TouchableOpacity style={styles.bannerButton} onPress={() => openDetails(FEATURED_ANIME)}>
+                  <Text style={styles.bannerButtonText}>▶ Ver Ahora</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Fila: Continuar Viendo */}
+            {continueWatching.length > 0 && (
+              <View style={styles.categoryContainer}>
+                <Text style={styles.categoryTitle}>⏳ Continuar Viendo</Text>
+                <FlatList
+                  horizontal
+                  data={continueWatching}
+                  keyExtractor={(item) => 'continue-' + item.id}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity style={styles.animeCard} onPress={() => openDetails(item)}>
+                      <Image source={{ uri: item.image }} style={styles.animeImage} />
+                      <View style={styles.progressContainer}>
+                        <View style={styles.progressBar} />
+                      </View>
+                      <Text numberOfLines={1} style={styles.animeTitle}>{item.title}</Text>
+                      <Text numberOfLines={1} style={styles.lastEpText}>{item.lastEpisodeTitle}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
             )}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0b0b0b',
-  },
-  mainScroll: {
-    flex: 1,
-    padding: 20,
-  },
-  appHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  appName: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-  },
-  appSubName: {
-    color: '#e50914',
-  },
-  freeBadge: {
-    backgroundColor: '#166534',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  freeBadgeText: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  heroSection: {
-    flexDirection: 'row',
-    height: height * 0.42,
-    marginBottom: 20,
-  },
-  heroInfo: {
-    flex: 1.1,
-    paddingRight: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    color: '#ffffff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  rating: {
-    color: '#f39c12',
-    fontSize: 20,
-  },
-  genreBadge: {
-    backgroundColor: '#222222',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    marginVertical: 6,
-  },
-  genreText: {
-    color: '#cccccc',
-    fontSize: 11,
-  },
-  synopsisLabel: {
-    color: '#aaaaaa',
-    fontSize: 11,
-    marginTop: 4,
-    fontWeight: 'bold',
-  },
-  synopsisText: {
-    color: '#777777',
-    fontSize: 11,
-    lineHeight: 16,
-  },
-  tvButtonsRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-  },
-  tvButtonPrimary: {
-    backgroundColor: '#e50914',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  tvButtonTextPrimary: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  tvButton: {
-    backgroundColor: '#2a2a2a',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-  },
-  tvButtonText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  heroPlayerContainer: {
-    flex: 1.3,
-    backgroundColor: '#000000',
-    borderRadius: 6,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#222',
-  },
-  webViewPlayer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  recommendationsContainer: {
-    marginTop: 5,
-  },
-  sectionTitle: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  horizontalList: {
-    paddingBottom: 10,
-  },
-  card: {
-    width: 125,
-    marginRight: 12,
-    backgroundColor: '#151515',
-    borderRadius: 6,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  cardSelected: {
-    borderColor: '#e50914',
-  },
-  cardImage: {
-    width: '100%',
-    height: 130,
-    resizeMode: 'cover',
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-    marginTop: 4,
-  },
-  scoreBadge: {
-    backgroundColor: '#1f6feb',
-    paddingHorizontal: 4,
-    borderRadius: 3,
-  },
-  scoreText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  ccBadge: {
-    backgroundColor: '#d97706',
-    paddingHorizontal: 4,
-    borderRadius: 3,
-  },
-  ccText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  cardTitle: {
-    color: '#ffffff',
-    fontSize: 11,
-    padding: 6,
-  },
-});
+            {/* Fila: Mi Lista */}
+            {myList.length > 0 && (
+              <View style={styles.categoryContainer}>
+                <Text style={styles.categoryTitle}>❤️ Mi Lista Favorita</Text>
+                <FlatList
+                  horizontal
+                  data={myList}
+                  keyExtractor={(item) => 'mylist-' + item.id}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity style={styles.animeCard} onPress={() => openDetails(item)}>
+                      <Image source={{ uri: item.image }} style={styles.animeImage} />
+                      <Text numberOfLines={1} style={styles.animeTitle}>{item.title}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+
+            {/* Filas del Catálogo Tradicional */}
+            {ANIME_DATA.map((section, index) => (
+              <View key={index} style={styles.categoryContainer}>
+                <Text style={styles.categoryTitle}>{section.category}</Text>
+                <FlatList
+                  horizontal
+                  data={section.animes}
+                  keyExtractor={(item) => item.id}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity style={styles.animeCard} onPress={() => openDetails(item)}>
+                      <Image source={{ uri: item.image }} style={styles.animeImage} />
+                      <View style={styles.badgeContainer}>
